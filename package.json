@@ -57,8 +57,6 @@
     "eslint-plugin-react": "^7.19.0",
     "eslint-plugin-react-hooks": "^2.5.0",
     "git-commit-msg-linter": "^2.5.3",
-    "husky": "^4.2.5",
-    "lint-staged": "^10.2.13",
     "prettier": "^2.1.1"
   }
 }

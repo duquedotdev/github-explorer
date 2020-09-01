@@ -26,6 +26,7 @@
       "@typescript-eslint"
   ],
   "rules": {
+    "react/jsx-one-expression-per-line": [<enabled>, { "allow": "none"|"literal"|"single-child" }],
     "@typescript-eslint/explicit-function-return-type": ["error", {
       "allowExpressions": true,
       "allowTypedFunctionExpressions": true
