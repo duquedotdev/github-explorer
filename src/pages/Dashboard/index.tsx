@@ -1,35 +1,69 @@
-import React from 'react';
+/* eslint-disable camelcase */
+import React, { useState, FormEvent } from 'react';
 import { FiChevronRight } from 'react-icons/fi';
 import logoImg from '../../assets/logo.svg';
-import { Title, Form, Repositories } from './styles';
+import {
+  Title, Form, Repositories, Error,
+} from './styles';
+import api from '../../services/api';
+import Repository from '../Repository';
 
-const Dashboard: React.FC = () => (
-  <>
-    <img src={logoImg} alt="Github Explorer" />
-    <Title>Explore repositórios no Github</Title>
-    <Form>
-      <input placeholder="Digite o nome do repositório" />
-      <button type="submit">Pesquisar</button>
-    </Form>
-    <Repositories>
-      <a href="teste">
-        <img src="https://avatars1.githubusercontent.com/u/57725054?s=460&u=75adfd78047f87ae96404beefa6339445539ac53&v=4" alt="Felipe Duque" />
-        <div>
-          <strong>duquedotdev/Dumont</strong>
-          <p>Sistema open-source de gerenciamento inteligente de escola de aviação.</p>
-        </div>
-        <FiChevronRight size={20} />
-      </a>
-      <a href="teste">
-        <img src="https://avatars1.githubusercontent.com/u/57725054?s=460&u=75adfd78047f87ae96404beefa6339445539ac53&v=4" alt="Felipe Duque" />
-        <div>
-          <strong>duquedotdev/Dumont</strong>
-          <p>Sistema open-source de gerenciamento inteligente de escola de aviação.</p>
-        </div>
-        <FiChevronRight size={20} />
-      </a>
-    </Repositories>
+interface Repository {
+  full_name: string;
+  description: string;
+  owner: {
+    login: string;
+    avatar_url: string;
+  }
+}
 
-  </>
-);
+const Dashboard: React.FC = () => {
+  const [newRepo, setNewRepo] = useState('');
+  const [inputError, setInputError] = useState('');
+  const [repositories, setRepositories] = useState<Repository[]>([]);
+
+  async function handleAddRepository(event: FormEvent<HTMLFormElement>):Promise<void> {
+    event.preventDefault();
+    if (!newRepo) {
+      setInputError('Digite o autor/nome do repositório');
+      return;
+    }
+    try {
+      const response = await api.get<Repository>(`repos/${newRepo}`);
+      const repository = response.data;
+      setRepositories([...repositories, repository]);
+      setNewRepo('');
+      setInputError('');
+    } catch (e) {
+      setInputError('Erro na busca do repositório');
+    }
+  }
+
+  return (
+    <>
+      <img src={logoImg} alt="Github Explorer" />
+      <Title>Explore repositórios no Github</Title>
+      <Form hasError={!!inputError} onSubmit={handleAddRepository}>
+        <input value={newRepo} onChange={(e):void => setNewRepo(e.target.value)} placeholder="Digite o nome do repositório" />
+        <button type="submit">Pesquisar</button>
+      </Form>
+
+      {inputError && <Error>{inputError}</Error>}
+
+      <Repositories>
+        {repositories.map((repository) => (
+          <a key={repository.full_name} href="teste">
+            <img src={repository.owner.avatar_url} alt={repository.owner.login} />
+            <div>
+              <strong>{repository.full_name}</strong>
+              <p>{repository.description}</p>
+            </div>
+            <FiChevronRight size={20} />
+          </a>
+        ))}
+      </Repositories>
+
+    </>
+  );
+};
 export default Dashboard;
